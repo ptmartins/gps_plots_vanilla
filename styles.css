@@ -4,6 +4,8 @@
     --bg-color: #f3f4ff;
     --font-color: #2f2f2f;
     --card-bg-color: #fff;
+    --loading-color: #dee0f3;
+    --loading-accent: #9ba1d2;
 }
 
 * {
@@ -30,6 +32,10 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
 }
 
+a {
+    text-decoration: dotted;
+}
+
 ul {
     list-style: none;
     padding-left: 0;
@@ -44,7 +50,8 @@ ul {
 
 .app,
 .app__header,
-.app__main {
+.app__main,
+.app__footer {
     display: flex;
 }
 
@@ -53,7 +60,8 @@ ul {
     flex-grow: 1;
 }
 
-.app__header {
+.app__header,
+.app__footer {
     justify-content: space-between;
 }
 
@@ -63,6 +71,11 @@ ul {
 
 .app__body {
     flex-grow: 1;
+    position: relative;
+}
+
+.app__footer {
+    text-align: right;
 }
 
 /* NAVIGATION */
@@ -128,4 +141,34 @@ ul {
     grid-column: 2/-1;
     grid-row: 1/3;
     padding: .75rem; 
+}
+
+/* LOADING SPINNER */
+.loading {
+    animation: spin 1s infinite linear;
+    border-radius: 100%;
+    border: 6px solid var(--loading-color);
+    border-top: 7px solid var(--loading-accent);
+    display: inline-block;
+    height: 3rem;
+    left: 50%;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 3rem;
+}
+
+.loading.display {
+    display: inline-block;
+}
+
+/* ANIMATIONS */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }

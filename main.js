@@ -70,6 +70,7 @@
      * Caches DOM elements
      */
     const cacheDOM = () => {
+        DOM.loadingSpinner = document.getElementById('loading');
         DOM.navList = document.getElementById('navList');
         DOM.appHeader = document.getElementById('appHeader');
         DOM.appBody = document.getElementById('appBody');
@@ -93,7 +94,7 @@
             let _user = user ?? 'Pedro';
 
             welcome.className = 'app_welcome';
-            welcome.textContent = `Welcome ${_user}`;
+            welcome.textContent = `Welcome, ${_user}`;
 
             return welcome;
         },
@@ -165,7 +166,10 @@
      * Renders Footer section
      */
     const renderFooter = () => {
-        DOM.appFooter.textContent = '© 2022 Pedro';
+        DOM.appFooter.innerHTML = `
+            <p>GPS Plots - © 2022 </p>
+            <p>Developed with ♥ by <a href="https://ptmartins.gothub.io" target="_blank">Pedro Martins</a></p>
+        `;
     };
 
     /**
@@ -184,15 +188,6 @@
             const _item = view.menuItem(obj[item].title, obj[item].cb, obj[item].icon);
             DOM.navList.appendChild(_item);
         }
-    };
-
-    /**
-     * Renders app scaffold structure
-     */
-    const renderScaffold = () => {
-        renderHeader();
-        renderFooter();
-        renderNav(menu);
     };
 
     /**
@@ -236,13 +231,20 @@
         DOM.appBody.appendChild(statsWrapper);
     };
 
+    const hideLoading = () => {
+        DOM.loadingSpinner.style.display = 'none'
+    }
+
     /**
      * Fectches data from JSON
      */
     const fetchData = async () => {
         const response = await fetch('/data/data.json');
         data = await response.json().then(data => {
-            calcStats(data);
+            setTimeout(() => {
+                hideLoading();
+                calcStats(data);
+            }, 1000)
         });
     };
 
@@ -251,10 +253,12 @@
      */
     const init = () => {
         cacheDOM();
-        renderScaffold();
+        renderHeader();
+        renderFooter();
+        renderNav(menu);
         fetchData();
     };
 
-    init();
+    window.addEventListener('DOMContentLoaded', init);
 
 })();
