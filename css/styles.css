@@ -11,6 +11,7 @@
     --font-color: #2f2f2f;
     --loading-color: #dee0f3;
     --loading-accent: #9ba1d2;
+    --list-item-bg-color: #fff;
     --border-radius: 5px;
     --border-radius-lrg: 10px;
     --default-transition: all .2s ease-in;
@@ -207,13 +208,19 @@ ul {
 
 .table__header,
 .list__item {
-    background-color: #fff;
+    background-color: var(--list-item-bg-color);
     border-radius: var(--border-radius);
+    box-shadow: 0;
     display: grid;
     gap: .75rem;
     grid-template-columns: 40px repeat(auto-fit, minmax(80px, 1fr));
     align-items: center;
     padding: .75rem;
+    transition: var(--default-transition);
+}
+
+.list__item:hover {
+    box-shadow: 0 0 6px rgba(198, 200, 220, .9);
 }
 
 .list__item__icon {
@@ -233,4 +240,15 @@ ul {
 
 .list__item__coordinates span {
     font-size: 13px;
+}
+
+.list__item__lat::before, 
+.list__item__long::before {
+    content: 'Lat.';
+    font-weight: 700;
+    margin-right: .375rem;
+}
+
+.list__item__long::before {
+    content: 'Lon.';
 }

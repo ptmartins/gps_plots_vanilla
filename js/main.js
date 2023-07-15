@@ -142,7 +142,6 @@
 
             const classes = icon.split(' ');
             _icon.className = 'list__item__icon';
-            debugger;
             classes.forEach(cls => {
                 _icon.classList.add(cls);
             });
