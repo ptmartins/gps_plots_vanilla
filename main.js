@@ -11,47 +11,23 @@
     let data = null;
 
     /**
-     * Show map
-     */
-    const showMap = () => {
-        clearAppBody();
-        DOM.appBody.innerHTML = 'SHOW MAP';
-    };
-
-    /**
-     * Show list of observations
-     */
-    const showObservations = () => {
-        clearAppBody();
-        DOM.appBody.innerHTML = 'SHOW OBSERVATIONS';
-    }
-
-    /**
-     * Show list of observations
-     */
-    const showDashboard = () => {
-        clearAppBody();
-        DOM.appBody.innerHTML = 'SHOW DASHBOARD';
-    }
-
-    /**
      * Menu pbject
      */
     const menu = {
         dashboard: {
             title: 'Dashboard',
-            icon: '<fa-solid fa-gauge-high',
-            cb: showDashboard
+            icon: 'fa-solid fa-gauge-high',
+            path: '/dashboard'
         },
         map: {
             title: 'Map',
-            icon: 'fa-solid fa-map-location-dot',
-            cb: showMap
+            icon: 'fa-solid fa-location-dot',
+            path: '/map'
         },
         observations: {
             title: 'Observations',
-            icon: 'fa-solid fa-binoculars',
-            cb: showObservations
+            icon: 'fa-solid fa-table-list',
+            path: '/observations'
         }
     };
 
@@ -86,6 +62,13 @@
 
             title.className = 'app_title';
             title.textContent = 'GPS Plots';
+
+            return title;
+        },
+        viewTitle: (txt) => {
+            const title = document.createElement('H2');
+            title.className = 'view__title';
+            title.textContent = txt;
 
             return title;
         },
@@ -132,7 +115,7 @@
 
             return _card;
         },
-        menuItem: (title, cb, icon) => {
+        menuItem: (title, icon, path) => {
             const _item = document.createElement('LI');
             const classes = icon.split(' ');
 
@@ -143,12 +126,47 @@
             });
 
             _item.setAttribute('title', title);
-
-            _item.addEventListener('click', ev => {
-                cb();
-            });
+            _item.setAttribute('data-path', path);
 
             return _item;
+        },
+        listItem: (icon, date, species, groupSize, lat, long) => {
+            const _listItem = document.createElement('DIV');
+            const _icon = document.createElement('I');
+            const _date = document.createElement('TIME');
+            const _species = document.createElement('H3');
+            const _groupSize = document.createElement('P');
+            const _coordinates = document.createElement('DIV');
+            const _lat = document.createElement('SPAN');
+            const _long = document.createElement('SPAN');
+
+            const classes = icon.split(' ');
+            _icon.className = 'list__item__icon';
+            debugger;
+            classes.forEach(cls => {
+                _icon.classList.add(cls);
+            });
+
+            _listItem.className = 'list__item';
+            _date.className = 'list__item__date';
+            _species.className = 'list__item__species';
+            _groupSize.className = 'list__item__groupSize';
+            _coordinates.className = 'list__item__coordinates';
+            _lat.className = 'list__item__lat';
+            _long.className = 'list__item__long';
+
+            _date.textContent = date;
+            _species.textContent = species;
+            _groupSize.textContent = groupSize;
+            _lat.textContent = lat;
+            _long.textContent = long;
+
+            _coordinates.append(_lat, _long);
+
+            _listItem.append(_icon, _date, _species, _groupSize, _coordinates);
+
+            return _listItem;
+
         }
     };
 
@@ -173,6 +191,75 @@
     };
 
     /**
+     * Show map
+     */
+    const showMap = data => {
+        clearAppBody();
+        DOM.appBody.innerHTML = 'SHOW MAP';
+    };
+
+    /**
+     * Show list of observations
+     */
+    const showObservations = data => {
+        clearAppBody();
+        DOM.appBody.appendChild(view.viewTitle('Observations'));
+
+        const table = document.createElement('DIV');
+        const tableHeader = document.createElement('DIV');
+        const tableBody = document.createElement('DIV');
+
+        table.className = 'table';
+        tableHeader.className = 'table__header';
+        tableBody.className = 'table__body';
+
+        for (let i = 0; i < 5; i++) {
+            const headerCell = document.createElement('SPAN');
+
+            switch (i) {
+                case 0:
+                    headerCell.textContent = '';
+                    break;
+                case 1:
+                    headerCell.textContent = 'Date';
+                    break;
+                case 2:
+                    headerCell.textContent = 'Species';
+                    break;
+                case 3:
+                    headerCell.textContent = 'Group Size';
+                    break;
+                case 4:
+                    headerCell.textContent = 'Coordinates';
+                    break;
+                default:
+                    break;
+
+            }
+
+            tableHeader.appendChild(headerCell);
+        }
+
+        data.forEach(item => {
+            console.log(item);
+            const row = view.listItem('fa-solid fa-binoculars', item.date_time, item.common_name, item.group_size, item.latitude, item.longitude);
+            tableBody.appendChild(row);
+        })
+
+        table.append(tableHeader, tableBody);
+
+        DOM.appBody.appendChild(table);
+    }
+
+    /**
+     * Show list of observations
+     */
+    const showDashboard = data => {
+        clearAppBody();
+        calcStats(data);
+    }
+
+    /**
      * Clears app body
      */
     const clearAppBody = () => {
@@ -184,9 +271,13 @@
      * @param {*} obj 
      */
     const renderNav = (obj) => {
+        DOM.menuItems = [];
+
         for (let item in obj) {
-            const _item = view.menuItem(obj[item].title, obj[item].cb, obj[item].icon);
+            const _item = view.menuItem(obj[item].title, obj[item].icon, obj[item].path);
             DOM.navList.appendChild(_item);
+
+            DOM.menuItems.push(_item);
         }
     };
 
@@ -219,7 +310,7 @@
      * Render stats cards
      */
     renderStats = () => {
-        const totalSpeciesCard = view.statsCard('Total Species', stats.totalSpecies, undefined, 'fa-solid fa-binoculars');
+        const totalSpeciesCard = view.statsCard('Total Species', stats.totalSpecies, undefined, 'fa-solid fa-hashtag');
         const totalObservationsCard = view.statsCard('Total Observations', stats.totalObservations, undefined, 'fa-solid fa-binoculars');
         const avgGroupSizeCard = view.statsCard('Average Group Size', stats.avgGroupSize, undefined, 'fa-solid fa-binoculars');
         const statsWrapper = document.createElement('DIV');
@@ -231,6 +322,9 @@
         DOM.appBody.appendChild(statsWrapper);
     };
 
+    /**
+     * Hide loading spinner
+     */
     const hideLoading = () => {
         DOM.loadingSpinner.style.display = 'none'
     }
@@ -244,18 +338,48 @@
             setTimeout(() => {
                 hideLoading();
                 calcStats(data);
+                setupEvents(data);
             }, 1000)
         });
     };
+
+    /**
+     * Setup events
+     */
+    const setupEvents = (data) => {
+
+        console.log(data);
+
+        DOM.menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const path = item.getAttribute('data-path');
+
+                if (path === '/map') {
+                    showMap(data);
+                } else if (path === '/observations') {
+                    showObservations(data);
+                } else if (path === '/dashboard') {
+                    showDashboard(data);
+                }
+            });
+        })
+    }
+
+    /**
+     * Render layout
+     */
+    const renderLayout = () => {
+        renderHeader();
+        renderFooter();
+        renderNav(menu);
+    }
 
     /**
      * Initializes app
      */
     const init = () => {
         cacheDOM();
-        renderHeader();
-        renderFooter();
-        renderNav(menu);
+        renderLayout();
         fetchData();
     };
 
