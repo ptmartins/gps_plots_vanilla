@@ -42,9 +42,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-    border-bottom: 2px dotted var(--font-color);
-    color: var(--font-color);
+    border-bottom: 2px dotted var(--secondary-accent-color);
+    color: var(--secondary-accent-color);
     text-decoration: none;
+    transition: var(--default-transition);
+}
+
+a:hover {
+    color: var(--font-color);
+    border: 0;
 }
 
 ul {
@@ -121,6 +127,7 @@ ul {
     display: flex;
     gap: 1.5rem;
     justify-content: space-between;
+    margin-bottom: 1.5rem;
 }
 
 .stats__card {
@@ -251,4 +258,11 @@ ul {
 
 .list__item__long::before {
     content: 'Lon.';
+}
+
+.panel--dashBoardChart{
+    background-color: var(--list-item-bg-color);
+    border-radius: var(--border-radius-lrg);
+    padding: 1.5rem;
+    width: 60%;
 }

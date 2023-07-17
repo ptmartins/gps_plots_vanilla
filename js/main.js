@@ -256,6 +256,71 @@
     const showDashboard = data => {
         clearAppBody();
         calcStats(data);
+        showDashboardChart(data);
+    }
+
+    /**
+     * 
+     */
+    const showDashboardChart = data => {
+        const container = document.createElement('DIV');
+        const canvas = document.createElement('CANVAS');
+        const ctx = canvas.getContext('2d');
+        const labels = Object.keys(stats.species);
+        const dataVals = Object.values(stats.species);
+
+        container.className = 'panel panel--dashBoardChart';
+        canvas.className = 'panel__canvas';
+        canvas.id = 'dashBoardChart';
+
+        container.appendChild(canvas);
+
+        labels.forEach(label => {
+            let names = label.split(' ');
+            names.forEach((name, i) => {
+                if (i === 0) {
+                    names[i] = name.charAt(0).toUpperCase() + '.';
+                }
+            })
+
+            names = names.join(' ');
+        })
+
+        const settings = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Observations by species',
+                        data: dataVals
+                    }
+                ]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        }
+
+        new Chart(ctx, settings);
+
+        DOM.appBody.appendChild(container);
     }
 
     /**
@@ -336,7 +401,8 @@
         data = await response.json().then(data => {
             setTimeout(() => {
                 hideLoading();
-                calcStats(data);
+                // calcStats(data);
+                showDashboard(data);
                 setupEvents(data);
             }, 1000)
         });
@@ -346,9 +412,6 @@
      * Setup events
      */
     const setupEvents = (data) => {
-
-        console.log(data);
-
         DOM.menuItems.forEach(item => {
             item.addEventListener('click', () => {
                 const path = item.getAttribute('data-path');
