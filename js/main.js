@@ -162,10 +162,34 @@
 
             _coordinates.append(_lat, _long);
 
-            _listItem.append(_icon, _date, _species, _groupSize, _coordinates);
+            _listItem.append(_icon, _date, _species);
+
+            if (groupSize) {
+                _listItem.appendChild(_groupSize);
+            }
+
+            if (lat && long) {
+                _listItem.appendChild(_coordinates);
+            }
 
             return _listItem;
+        },
+        panel: (title, className) => {
+            const panel = document.createElement('DIV');
+            const header = document.createElement('H2');
+            const body = document.createElement('DIV');
 
+            panel.className = 'panel';
+            header.className = 'panel__header';
+            header.textContent = title;
+
+            if (className) {
+                panel.classList.add(className);
+            }
+
+            panel.append(header, body);
+
+            return panel;
         }
     };
 
@@ -201,6 +225,8 @@
      * Show list of observations
      */
     const showObservations = data => {
+        setBodyClass(DOM.appBody, 'app__body app__body--observations');
+
         clearAppBody();
         DOM.appBody.appendChild(view.viewTitle('Observations'));
 
@@ -248,19 +274,33 @@
         table.append(tableHeader, tableBody);
 
         DOM.appBody.appendChild(table);
+    };
+
+    const setBodyClass = (el, newClasses) => {
+        let classes = newClasses.split(' ');
+        el.classList.remove(...el.classList);
+        classes.forEach(cls => {
+            el.classList.add(cls);
+        });
     }
 
     /**
      * Show list of observations
      */
     const showDashboard = data => {
+
+        setBodyClass(DOM.appBody, 'app__body app__body--dashboard');
+
         clearAppBody();
         calcStats(data);
         showDashboardChart(data);
+        showLastObservations(data);
     }
 
     /**
+     * Show Dashboard data
      * 
+     * @param {*} data 
      */
     const showDashboardChart = data => {
         const container = document.createElement('DIV');
@@ -275,16 +315,17 @@
 
         container.appendChild(canvas);
 
-        labels.forEach(label => {
+        labels.forEach((label, i) => {
             let names = label.split(' ');
-            names.forEach((name, i) => {
-                if (i === 0) {
-                    names[i] = name.charAt(0).toUpperCase() + '.';
+            names.forEach((name, j) => {
+                if (names.length > 1 && j == 0) {
+                    names[j] = name.charAt(0).toUpperCase() + '.';
                 }
-            })
 
-            names = names.join(' ');
-        })
+                label = names.join(' ');
+            });
+            labels[i] = label;
+        });
 
         const settings = {
             type: 'bar',
@@ -322,6 +363,25 @@
 
         DOM.appBody.appendChild(container);
     }
+
+    /**
+     * 
+     * @param {*} data 
+     */
+    const showLastObservations = data => {
+        const container = view.panel('Last Observations', 'panel--lastObservations');
+
+        console.log(container);
+
+        for (let i = 0; i < 10; i++) {
+            let item = view.listItem('fa-solid fa-binoculars', data[i].date_time, data[i].common_name);
+
+            container.appendChild(item);
+        }
+
+        DOM.appBody.appendChild(container);
+
+    };
 
     /**
      * Clears app body
@@ -400,12 +460,34 @@
         const response = await fetch('/data/data.json');
         data = await response.json().then(data => {
             setTimeout(() => {
+                sortData(data);
                 hideLoading();
-                // calcStats(data);
+                calcStats(data);
                 showDashboard(data);
                 setupEvents(data);
             }, 1000)
         });
+    };
+
+    /**
+     * Sort data from newest to oldest
+     * 
+     * @param {*} data 
+     */
+    const sortData = data => {
+
+        const options = {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        };
+
+        const locale = navigator.language;
+
+        data.forEach(item => {
+            item.date_time = new Date(item.date_time).toLocaleString(locale, options);
+        });
+        data.sort((a, b) => new Date(b.date_time) - new Date(a.date_time));
     };
 
     /**
