@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;400;700&display=swap');
 
 :root {
@@ -59,17 +60,22 @@ ul {
 }
 
 .nav,
-.app__header,
 .app__body,
 .app__footer {
     padding: 1.5rem;
+}
+
+.app__header {
+    border-bottom: 1px solid #c1cecf;
+    margin: 0 1.5rem;
+    padding: 1.5rem 0;
 }
 
 .app__body--dashboard {
     display: grid;
     gap: .75rem;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: min-content 1fr;
+    grid-template-rows: repeat(2, min-content);
 }
 
 .app,
@@ -96,6 +102,11 @@ ul {
 .app__body {
     flex-grow: 1;
     position: relative;
+}
+
+.app__body--map {
+    display: flex;
+    flex-direction: column;
 }
 
 .app__footer {
@@ -292,4 +303,10 @@ ul {
 .panel--lastObservations .list__item__species {
     font-size: 14px;
     font-weight: 400;
+}
+
+.map {
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
 }

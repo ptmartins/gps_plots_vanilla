@@ -6,6 +6,31 @@
     const DOM = {};
 
     /**
+     * Leaflet map object
+     */
+    let map = null;
+
+    /**
+     * Species object
+     */
+    const species = [];
+
+    /**
+     * Leaflet map options
+     */
+    const mapOptions = {
+        center: [38.7223, -9.1393],
+        zoom: 7,
+        maxZoom: 16,
+        minZoom: 7
+    };
+
+    const mapCorners = {
+        1: L.latLng(45.00, -7.00),
+        2: L.latLng(35.00, -11.00)
+    };
+
+    /**
      * Data
      */
     let data = null;
@@ -190,6 +215,14 @@
             panel.append(header, body);
 
             return panel;
+        },
+        map: () => {
+            const map = document.createElement('DIV');
+
+            map.id = 'map';
+            map.className = 'map';
+
+            return map;
         }
     };
 
@@ -218,7 +251,34 @@
      */
     const showMap = data => {
         clearAppBody();
-        DOM.appBody.innerHTML = 'SHOW MAP';
+        setBodyClass(DOM.appBody, 'app__body app__body--map');
+        DOM.appBody.appendChild(view.viewTitle('Map'));
+        const _map = view.map();
+
+        DOM.appBody.appendChild(_map);
+
+        setTimeout(() => {
+            map = L.map('map').setView(mapOptions.center, mapOptions.zoom);
+            map.options.maxZoom = mapOptions.maxZoom;
+            map.options.minZoom = mapOptions.minZoom;
+            map.setMaxBounds([mapCorners[1], mapCorners[2]]);
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 16,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            addPoints(data);
+        }, 1000)
+    };
+
+    /**
+     * Add markers to map
+     */
+    addPoints = data => {
+        for (var i = 0; i < data.length; i++) {
+            L.marker([data[i].latitude, data[i].longitude])
+                .bindPopup(data[i].common_name)
+                .addTo(map);
+        }
     };
 
     /**
@@ -266,7 +326,6 @@
         }
 
         data.forEach(item => {
-            console.log(item);
             const row = view.listItem('fa-solid fa-binoculars', item.date_time, item.common_name, item.group_size, item.latitude, item.longitude);
             tableBody.appendChild(row);
         })
@@ -371,16 +430,13 @@
     const showLastObservations = data => {
         const container = view.panel('Last Observations', 'panel--lastObservations');
 
-        console.log(container);
-
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 8; i++) {
             let item = view.listItem('fa-solid fa-binoculars', data[i].date_time, data[i].common_name);
 
             container.appendChild(item);
         }
 
         DOM.appBody.appendChild(container);
-
     };
 
     /**
@@ -462,10 +518,24 @@
             setTimeout(() => {
                 sortData(data);
                 hideLoading();
+                getSpecies(data);
                 calcStats(data);
                 showDashboard(data);
                 setupEvents(data);
             }, 1000)
+        });
+    };
+
+    /**
+     * Get species from data
+     */
+    const getSpecies = data => {
+
+        data.forEach(item => {
+            let _species = item.common_name;
+            if (!species.includes(_species)) {
+                species.push(_species);
+            }
         });
     };
 
