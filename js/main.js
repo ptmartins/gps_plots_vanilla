@@ -321,9 +321,6 @@
     addPoints = (data, map) => {
 
         for (var i = 0; i < data.length; i++) {
-
-            console.log(dataSpecies, data[i].common_name);
-
             if (dataSpecies === 'all') {
 
                 L.marker([data[i].latitude, data[i].longitude])
