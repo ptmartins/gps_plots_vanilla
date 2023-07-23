@@ -16,6 +16,11 @@
     const species = [];
 
     /**
+     * Data species
+     */
+    let dataSpecies = 'all';
+
+    /**
      * Leaflet map options
      */
     const mapOptions = {
@@ -223,6 +228,32 @@
             map.className = 'map';
 
             return map;
+        },
+        select: (data, species) => {
+            const select = document.createElement('SELECT');
+            const option = document.createElement('OPTION');
+            option.value = 'all';
+            option.textContent = 'All species';
+            select.appendChild(option);
+
+            species.forEach(item => {
+                const option = document.createElement('OPTION');
+                option.value = item;
+                option.textContent = item;
+                select.appendChild(option);
+            });
+
+            select.addEventListener('change', ev => {
+                dataSpecies = ev.target.value;
+
+                if (map) {
+                    map.remove();
+                }
+
+                renderMap(data, dataSpecies);
+            });
+
+            return select;
         }
     };
 
@@ -249,13 +280,27 @@
     /**
      * Show map
      */
-    const showMap = data => {
+    const showMap = (data, dataSpecies) => {
         clearAppBody();
         setBodyClass(DOM.appBody, 'app__body app__body--map');
-        DOM.appBody.appendChild(view.viewTitle('Map'));
+
+        const title = view.viewTitle('Map');
+        const select = view.select(data, species);
         const _map = view.map();
 
+        title.appendChild(select);
+        DOM.appBody.appendChild(title);
         DOM.appBody.appendChild(_map);
+
+        renderMap(data, dataSpecies);
+    };
+
+    /**
+     * 
+     * @param {*} data 
+     * @param {*} dataSpecies 
+     */
+    const renderMap = (data, dataSpecies) => {
 
         setTimeout(() => {
             map = L.map('map').setView(mapOptions.center, mapOptions.zoom);
@@ -266,18 +311,31 @@
                 maxZoom: 16,
                 attribution: '© OpenStreetMap'
             }).addTo(map);
-            addPoints(data);
+            addPoints(data, map);
         }, 1000)
     };
 
     /**
      * Add markers to map
      */
-    addPoints = data => {
+    addPoints = (data, map) => {
+
         for (var i = 0; i < data.length; i++) {
-            L.marker([data[i].latitude, data[i].longitude])
-                .bindPopup(data[i].common_name)
-                .addTo(map);
+
+            console.log(dataSpecies, data[i].common_name);
+
+            if (dataSpecies === 'all') {
+
+                L.marker([data[i].latitude, data[i].longitude])
+                    .bindPopup(data[i].common_name)
+                    .addTo(map);
+            }
+            else if (dataSpecies == data[i].common_name) {
+
+                L.marker([data[i].latitude, data[i].longitude])
+                    .bindPopup(data[i].common_name)
+                    .addTo(map);
+            }
         }
     };
 
@@ -335,6 +393,12 @@
         DOM.appBody.appendChild(table);
     };
 
+    /**
+     * Set app body modifier class
+     * 
+     * @param {*} el 
+     * @param {*} newClasses 
+     */
     const setBodyClass = (el, newClasses) => {
         let classes = newClasses.split(' ');
         el.classList.remove(...el.classList);
@@ -569,7 +633,7 @@
                 const path = item.getAttribute('data-path');
 
                 if (path === '/map') {
-                    showMap(data);
+                    showMap(data, dataSpecies);
                 } else if (path === '/observations') {
                     showObservations(data);
                 } else if (path === '/dashboard') {
