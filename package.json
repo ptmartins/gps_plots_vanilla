@@ -2,9 +2,11 @@
   "name": "gps_plots_vanilla",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "default": "src/index.html",
   "scripts": {
-    "dev": "npx parcel ./src/index.html"
+    "dev": "parcel src/index.html",
+    "build": "parcel build src/index.html"
   },
   "author": "",
   "license": "ISC",
